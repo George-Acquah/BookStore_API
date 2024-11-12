@@ -17,7 +17,7 @@ namespace BookStore.Domain.Entities
 
         [ForeignKey("Role")]
         public Guid RoleId { get; set; }
-        public Role Role { get; set; }
+        public Role? Role { get; set; }
         public required string Email { get; set; }
         public required string Password { get; set; }
     }

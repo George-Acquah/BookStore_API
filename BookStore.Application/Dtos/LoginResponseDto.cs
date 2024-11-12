@@ -15,7 +15,7 @@ namespace BookStore.Application.Dtos
     {
         public required string UserName { get; set; }
 
-        public string UserRole { get; set; }
+        public required string UserRole { get; set; }
         public required ITokens Tokens { get; set; }
     }
 }

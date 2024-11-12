@@ -68,10 +68,10 @@ namespace BookStore.API.Controllers
         }
 
         [HttpGet]
-        [Authorize]
-        public async Task<IActionResult> GetAllUsers()
+        //[Authorize]
+        public async Task<IActionResult> GetAllUsers([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var result = await _userRepository.GetAllUsersAsync();
+            var result = await _userRepository.GetAllUsersAsync(pageNumber, pageSize);
 
             if (!result.Success)
             {

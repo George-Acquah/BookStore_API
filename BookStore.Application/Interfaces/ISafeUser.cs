@@ -6,6 +6,8 @@ namespace BookStore.Application.Interfaces
     {
         Guid Id { get; }
         string Email { get; set; }
+
+        string UserRole { get; set; }
         string UserName { get; set; }
     }
 }

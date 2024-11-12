@@ -7,6 +7,7 @@ using BookStore.Infrastructure.DB;
 using BookStore.Infrastructure.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Linq.Expressions;
 
 
 namespace BookStore.Infrastructure.Repositories
@@ -17,29 +18,36 @@ namespace BookStore.Infrastructure.Repositories
         private readonly ILogger<UserRepository> _logger = logger;
         private readonly CryptographicHelpers _cryptographyHelpers = cryptographyHelpers;
 
-        public async Task<RepositoryResponse<List<ISafeUser>>> GetAllUsersAsync()
+        public async Task<RepositoryResponse<IPaginationMetaDto<ISafeUser>>> GetAllUsersAsync(int pageNumber, int pageSize, Expression<Func<User, bool>>? filter = null)
         {
             try
             {
-                var result = await _dbContext.Users.ToListAsync();
-                var users = result.Select(r => new SafeUserDto
+                var query = _dbContext.Users.AsQueryable();
+
+                if (filter != null)
+                {
+                    query = query.Where(filter);
+                }
+
+                var projectedQuery = query.Include(u => u.Role).Select(r => new SafeUserDto
                 {
                     Id = r.Id,
                     Email = r.Email,
                     UserName = r.UserName,
+                    UserRole = r.Role != null ? r.Role.Name.ToString() : "",
                     CreatedAt = r.CreatedAt,
                     UpdatedAt = r.UpdatedAt
-                }
-                ).Cast<ISafeUser>().ToList();
+                }).Cast<ISafeUser>();
 
+                var paginatedUsers = await PaginationHelper.GetPaginatedResultAsync(projectedQuery, pageNumber, pageSize);
 
-                return RepositoryResponse<List<ISafeUser>>.SuccessResult(users);
+                return RepositoryResponse<IPaginationMetaDto<ISafeUser>>.SuccessResult(paginatedUsers);
 
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, ex.Message);
-                return RepositoryResponse<List<ISafeUser>>.FailureResult(ex.Message);
+                return RepositoryResponse<IPaginationMetaDto<ISafeUser>>.FailureResult(ex.Message);
             }
         }
         public async Task<RepositoryResponse<string>> RegisterUserAsync(RegisterDto registerDto, ERolesEnum rolesEnum)
@@ -99,7 +107,7 @@ namespace BookStore.Infrastructure.Repositories
                     Tokens = new Tokens
                     { AccessToken = accessToken, RefreshToken = "" },
                     UserName = user.UserName,
-                    UserRole = user.Role.Name.ToString()
+                    UserRole = user?.Role?.Name.ToString() ?? ""
                 });
             }
             catch (Exception ex)
