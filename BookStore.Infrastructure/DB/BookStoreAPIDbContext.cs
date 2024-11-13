@@ -8,8 +8,20 @@ namespace BookStore.Infrastructure.DB
 
         public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
-
         public DbSet<Book> Books { get; set; }
+        public DbSet<BookCategory> BookCategories {  get; set; }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            builder.Entity<User>()
+                .HasIndex(u => u.Email)
+                .IsUnique();
+
+            builder.Entity<Book>()
+                .HasIndex(b => b.Title)
+                .IsUnique();
+        }
+
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             UpdateTimestamps();

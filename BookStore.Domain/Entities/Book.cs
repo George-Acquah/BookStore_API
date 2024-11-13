@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BookStore.Domain.Entities
 {
@@ -7,8 +6,10 @@ namespace BookStore.Domain.Entities
     {
         User? AddedBy { get; set; }
         Guid AddedById { get; set; }
+
+        List<BookCategory>? Categories { get; set; }
+        List<Guid> CategoryIds { get; set; }
         string Author { get; set; }
-        string Category { get; set; }
         string Description { get; set; }
         Guid Id { get; set; }
         string BookImgUrl { get; set; }
@@ -18,13 +19,12 @@ namespace BookStore.Domain.Entities
     }
 
     public class Book : BaseEntity, IBook
-    { 
+    {
         public Guid Id { get; set; }
 
         [ForeignKey("User")]
         public Guid AddedById { get; set; }
         public User? AddedBy { get; set; }
-        [Key]
         public required string Title { get; set; }
 
         public required string Author { get; set; }
@@ -35,7 +35,9 @@ namespace BookStore.Domain.Entities
 
         public required string FilePath { get; set; }
 
-        public required string Category{ get; set; }
+        [ForeignKey("BookCategory")]
+        public required List<Guid> CategoryIds { get; set; }
+        public List<BookCategory>? Categories { get; set; }
 
         public float Price { get; set; }
 
