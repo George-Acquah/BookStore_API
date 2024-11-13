@@ -1,4 +1,6 @@
 ﻿using BookStore.Application.Interfaces;
+using BookStore.Application.Interfaces.Services;
+using BookStore.Application.Services;
 using BookStore.Infrastructure.DB;
 using BookStore.Infrastructure.Helpers;
 using BookStore.Infrastructure.Repositories;
@@ -17,6 +19,10 @@ namespace BookStore.Infrastructure.Extensions
 
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IRolesRepository, RolesRepository>();
+            services.AddScoped<IFilesRepository, FileRepository>();
+
+
+            services.AddScoped<IFileService, FileService>();
 
             services.AddSingleton<CryptographicHelpers>();
         }

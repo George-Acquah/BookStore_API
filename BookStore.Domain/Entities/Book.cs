@@ -8,7 +8,7 @@ namespace BookStore.Domain.Entities
         User? AddedBy { get; set; }
         Guid AddedById { get; set; }
         string Author { get; set; }
-        List<string> Categories { get; set; }
+        string Category { get; set; }
         string Description { get; set; }
         Guid Id { get; set; }
         string BookImgUrl { get; set; }
@@ -18,7 +18,7 @@ namespace BookStore.Domain.Entities
     }
 
     public class Book : BaseEntity, IBook
-    {
+    { 
         public Guid Id { get; set; }
 
         [ForeignKey("User")]
@@ -35,7 +35,7 @@ namespace BookStore.Domain.Entities
 
         public required string FilePath { get; set; }
 
-        public List<string> Categories { get; set; } = [];
+        public required string Category{ get; set; }
 
         public float Price { get; set; }
 

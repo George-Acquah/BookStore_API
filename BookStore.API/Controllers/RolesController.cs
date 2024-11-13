@@ -1,5 +1,6 @@
 ﻿using BookStore.Application.Common;
 using BookStore.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookStore.API.Controllers
@@ -11,8 +12,17 @@ namespace BookStore.API.Controllers
         private readonly IRolesRepository _rolesRepository = rolesRepository;
 
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> GetAllRoles()
         {
+            var useridClaim = User.FindFirst("UserId")?.Value;
+
+            if (useridClaim == null || !Guid.TryParse(useridClaim, out Guid userId))
+            {
+                return Unauthorized(new BaseAPIResponse<string>(StatusCodes.Status401Unauthorized, "User ID claim is missing or invalid", null));
+            }
+
+            Console.WriteLine(userId);
             var result = await _rolesRepository.GetAllRolesAsync();
             if (!result.Success)
             {

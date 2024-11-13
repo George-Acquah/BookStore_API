@@ -16,8 +16,6 @@ namespace BookStore.API.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterDto registerDto, [FromQuery] string? roleQuery)
         {
-            var resolvedRoleQuery = roleQuery ?? "USER";
-
             if (!Enum.TryParse<ERolesEnum>(roleQuery?.Trim('"'), true, out ERolesEnum userRoleEnum))
             {
                 userRoleEnum = ERolesEnum.USER;
@@ -91,6 +89,7 @@ namespace BookStore.API.Controllers
         }
 
         [HttpGet("{userId}")]
+        [Authorize]
         public async Task<IActionResult> GetSingleUser(string userId)
         {
             var userGuid = Guid.Parse(userId);
