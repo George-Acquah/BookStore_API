@@ -63,7 +63,7 @@ namespace BookStore.Infrastructure.Repositories
             }
         }
 
-        public async Task<RepositoryResponse<IPaginationMetaDto<Book>>> GetAllBooksAsync(int pageNumber, int pageSize, Expression<Func<Book, bool>>? filter = null)
+        public async Task<RepositoryResponse<IPaginationMetaDto<IBookResponseDto>>> GetAllBooksAsync(int pageNumber, int pageSize, Expression<Func<Book, bool>>? filter = null)
         {
             try
             {
@@ -74,14 +74,29 @@ namespace BookStore.Infrastructure.Repositories
                     query = query.Where(filter);
                 }
 
-                var paginatedBooks= await PaginationHelper.GetPaginatedResultAsync(query, pageNumber, pageSize);
+                var projectedQuery = query.Include(b => b.Categories).Select(r => new BookResponseDto
+                {
+                    Id = r.Id.ToString(),
+                    Title = r.Title,
+                    AddedBy = r.AddedBy != null ? r.AddedBy.UserName : "",
+                    Author = r.Author,
+                    Description = r.Description,
+                    Price = r.Price,
+                    BookFilePath = r.FilePath,
+                    BookImgUrl = r.BookImgUrl,
+                    CreatedAt = r.CreatedAt,
+                    UpdatedAt = r.UpdatedAt,
+                    Categories = (List<string>)(r.Categories != null ? r.Categories.Select(c => c.Name) : new List<string>()),
+            }).Cast<IBookResponseDto>();
 
-                return RepositoryResponse<IPaginationMetaDto<Book>>.SuccessResult(paginatedBooks);
+                var paginatedBooks= await PaginationHelper.GetPaginatedResultAsync(projectedQuery, pageNumber, pageSize);
+
+                return RepositoryResponse<IPaginationMetaDto<IBookResponseDto>>.SuccessResult(paginatedBooks);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving users.");
-                return RepositoryResponse<IPaginationMetaDto<Book>>.FailureResult(ex.Message);
+                return RepositoryResponse<IPaginationMetaDto<IBookResponseDto>>.FailureResult(ex.Message);
             }
         }
     }
