@@ -10,6 +10,8 @@ namespace BookStore.Application.Interfaces
     {
         Task<RepositoryResponse<IPaginationMetaDto<ISafeUser>>> GetAllUsersAsync(int page, int pageSize, Expression<Func<User, bool>>? filter = null);
         Task<RepositoryResponse<ILoginResponseDto>> LoginUserAsync(LoginDto loginDto);
+
+        Task<RepositoryResponse<ISafeUser>> GetSingleUserAsync(Guid userId);
         Task<RepositoryResponse<string>> RegisterUserAsync(RegisterDto registerDto, ERolesEnum rolesEnum);
     }
 }

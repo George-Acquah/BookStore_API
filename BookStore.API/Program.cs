@@ -1,11 +1,35 @@
 using BookStore.Infrastructure.Extensions;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-/* Inject All Service here*/
+/* Inject All Services here */
 builder.Services.AddControllers();
 builder.Services.AddInfrastructure(builder.Configuration);
+
+var jwtSettings = builder.Configuration.GetSection("Jwt");
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtSettings["Issuer"],
+        ValidAudience = jwtSettings["Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]!))
+    };
+
+});
+
 
 // Configure Swagger with JWT Bearer Authentication
 builder.Services.AddSwaggerGen(c =>
@@ -37,19 +61,18 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Configure CORS to allow ngrok connections (replace with your ngrok subdomain)
+// Configure CORS policy to allow requests from any origin
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowNgrok",
-        builder => builder
-            .WithOrigins("https://glad-lion-holy.ngrok-free.app") // Replace with your actual ngrok subdomain
-            .AllowAnyHeader()
-            .AllowAnyMethod());
+    options.AddPolicy("AllowAll", policy =>
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+    );
 });
 
 var app = builder.Build();
 
-// Enable Swagger only in Development mode
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -60,14 +83,16 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-// Configure the HTTP request pipeline.
+// Enable HTTPS redirection in non-development environments
 if (!app.Environment.IsDevelopment())
 {
-    app.UseHttpsRedirection(); // Only enforce HTTPS in production
+    app.UseHttpsRedirection();
 }
 
-app.UseCors("AllowNgrok"); // Apply CORS policy for ngrok
+// Apply CORS policy before authentication/authorization
+app.UseCors("AllowAll");
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

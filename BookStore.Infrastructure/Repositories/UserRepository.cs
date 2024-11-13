@@ -89,6 +89,28 @@ namespace BookStore.Infrastructure.Repositories
             }
         }
 
+        public async Task<RepositoryResponse<ISafeUser>> GetSingleUserAsync(Guid userId)
+        {
+            try
+            {
+                var user = await _dbContext.Users.Include(u => u.Role).Select(r => new SafeUserDto
+                {
+                    Id = r.Id,
+                    Email = r.Email,
+                    UserName = r.UserName,
+                    UserRole = r.Role != null ? r.Role.Name.ToString() : "",
+                    CreatedAt = r.CreatedAt,
+                    UpdatedAt = r.UpdatedAt
+                }).Cast<ISafeUser>().FirstAsync(ru => ru.Id == userId);
+
+                return RepositoryResponse<ISafeUser>.SuccessResult(user);
+            } catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return RepositoryResponse<ISafeUser>.FailureResult(ex.Message);
+            }
+        }
+
         public async Task<RepositoryResponse<ILoginResponseDto>> LoginUserAsync(LoginDto loginDto)
         {
             try
