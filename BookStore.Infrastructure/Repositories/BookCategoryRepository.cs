@@ -62,7 +62,7 @@ namespace BookStore.Infrastructure.Repositories
             }
         }
 
-        public async Task<RepositoryResponse<IPaginationMetaDto<BookCategory>>> GetAllBookCategoriesAsync(int pageNumber, int pageSize, Expression<Func<BookCategory, bool>>? filter = null)
+        public async Task<RepositoryResponse<IPaginationMetaDto<string>>> GetAllBookCategoriesAsync(int pageNumber, int pageSize, Expression<Func<BookCategory, bool>>? filter = null)
         {
             try
             {
@@ -73,14 +73,16 @@ namespace BookStore.Infrastructure.Repositories
                     query = query.Where(filter);
                 }
 
-                var paginatedBookCategories = await PaginationHelper.GetPaginatedResultAsync(query, pageNumber, pageSize);
+                var projectedQuery = query.Select(c => c.Name);
 
-                return RepositoryResponse<IPaginationMetaDto<BookCategory>>.SuccessResult(paginatedBookCategories);
+                var paginatedBookCategories = await PaginationHelper.GetPaginatedResultAsync(projectedQuery, pageNumber, pageSize);
+
+                return RepositoryResponse<IPaginationMetaDto<string>>.SuccessResult(paginatedBookCategories);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving users.");
-                return RepositoryResponse<IPaginationMetaDto<BookCategory>>.FailureResult(ex.Message);
+                return RepositoryResponse<IPaginationMetaDto<string>>.FailureResult(ex.Message);
             }
         }
     }

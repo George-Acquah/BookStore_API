@@ -20,6 +20,15 @@ namespace BookStore.Infrastructure.DB
             builder.Entity<Book>()
                 .HasIndex(b => b.Title)
                 .IsUnique();
+
+            builder.Entity<Book>()
+                .HasMany(b => b.Categories)
+                .WithMany(c => c.Books)
+                .UsingEntity<Dictionary<string, object>>(
+                "BookCategory",
+                b => b.HasOne<BookCategory>().WithMany().HasForeignKey("CategoryId"),
+                c => c.HasOne<Book>().WithMany().HasForeignKey("BookId")
+               );
         }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

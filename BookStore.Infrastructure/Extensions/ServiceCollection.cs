@@ -20,9 +20,13 @@ namespace BookStore.Infrastructure.Extensions
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IRolesRepository, RolesRepository>();
             services.AddScoped<IFilesRepository, FileRepository>();
+            services.AddScoped<IBookCategoryRepository, BookCategoryRepository>();
+            services.AddScoped<IBooksRepository, BookRepository>();
 
 
             services.AddScoped<IFileService, FileService>();
+            services.AddScoped<IBookCategoryService, BookCategoryService>();
+            services.AddScoped<IBookService, BookService>();
 
             services.AddSingleton<CryptographicHelpers>();
         }

@@ -11,36 +11,41 @@ namespace BookStore.Application.Services
         private readonly IBooksRepository _bookRepository = booksRepository;
         private readonly IBookCategoryRepository _bookCategoryRepository = bookCategoryRepository;
 
-        public async Task<RepositoryResponse<string>> UploadBookAsync(AddBookDto bookDto)
+        public async Task<RepositoryResponse<string>> UploadBookAsync(AddBookDto bookDto, Guid addedById)
         {
-            var bookCategoryIds = new List<Guid>();
-            foreach(var category in bookDto.Categories)
-            {
-                var bookCategory = await _bookCategoryRepository.GetBookCategoryByNameAsync(category);
+            // Create a list to store BookCategory entities
+            var bookCategories = new List<BookCategory>();
 
-                if(bookCategory.Success && bookCategory.Data != null)
+            // Retrieve and validate each category from the database
+            foreach (var categoryName in bookDto.Categories)
+            {
+                var bookCategory = await _bookCategoryRepository.GetBookCategoryByNameAsync(categoryName);
+
+                if (bookCategory.Success && bookCategory.Data != null)
                 {
-                    bookCategoryIds.Add(bookCategory.Data.Id);
+                    bookCategories.Add((BookCategory)bookCategory.Data);
                 }
                 else
                 {
-                    return RepositoryResponse<string>.FailureResult(bookCategory.ErrorMessage ?? "This Category does not exist in the databse");
+                    return RepositoryResponse<string>.FailureResult(bookCategory.ErrorMessage ?? "This category does not exist in the database");
                 }
             }
 
+            // Create the Book entity
             var book = new Book
             {
-                Id = new Guid(),
-                AddedById = new Guid(),
-                CategoryIds = bookCategoryIds,
+                Id = Guid.NewGuid(),
+                AddedById = addedById,
                 Author = bookDto.Author,
                 Title = bookDto.Title,
                 Description = bookDto.Description,
                 BookImgUrl = bookDto.BookImgUrl,
                 FilePath = bookDto.FilePath,
-                Price = bookDto.Price
+                Price = bookDto.Price,
+                Categories = bookCategories
             };
 
+            // Save the book using the repository
             return await _bookRepository.SaveBookAsync(book);
         }
 

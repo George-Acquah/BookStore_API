@@ -7,7 +7,6 @@ using BookStore.Infrastructure.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
-using System.Linq;
 
 namespace BookStore.Infrastructure.Repositories
 {
@@ -67,14 +66,19 @@ namespace BookStore.Infrastructure.Repositories
         {
             try
             {
-                var query = _dbContext.Books.AsQueryable();
+                var query = _dbContext.Books
+                                .Include(b => b.Categories)
+                                .Include(b => b.AddedBy)
+                                .AsQueryable();
+
+                Console.WriteLine(query);
 
                 if (filter != null)
                 {
                     query = query.Where(filter);
                 }
 
-                var projectedQuery = query.Include(b => b.Categories).Select(r => new BookResponseDto
+                var projectedQuery = query.Select(r => new BookResponseDto
                 {
                     Id = r.Id.ToString(),
                     Title = r.Title,
@@ -86,8 +90,8 @@ namespace BookStore.Infrastructure.Repositories
                     BookImgUrl = r.BookImgUrl,
                     CreatedAt = r.CreatedAt,
                     UpdatedAt = r.UpdatedAt,
-                    Categories = (List<string>)(r.Categories != null ? r.Categories.Select(c => c.Name) : new List<string>()),
-            }).Cast<IBookResponseDto>();
+                    Categories = r.Categories != null ? r.Categories.Select(c => c.Name).ToList() : new List<string>()
+                }).Cast<IBookResponseDto>();
 
                 var paginatedBooks= await PaginationHelper.GetPaginatedResultAsync(projectedQuery, pageNumber, pageSize);
 

@@ -8,7 +8,6 @@ namespace BookStore.Domain.Entities
         Guid AddedById { get; set; }
 
         List<BookCategory>? Categories { get; set; }
-        List<Guid> CategoryIds { get; set; }
         string Author { get; set; }
         string Description { get; set; }
         Guid Id { get; set; }
@@ -35,8 +34,6 @@ namespace BookStore.Domain.Entities
 
         public required string FilePath { get; set; }
 
-        [ForeignKey("BookCategory")]
-        public required List<Guid> CategoryIds { get; set; }
         public List<BookCategory>? Categories { get; set; }
 
         public float Price { get; set; }
