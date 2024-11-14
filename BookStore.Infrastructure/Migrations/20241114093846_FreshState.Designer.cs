@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BookStore.Infrastructure.Migrations
 {
     [DbContext(typeof(BookStoreAPIDbContext))]
-    [Migration("20241113114727_BooksContainCategoriesTable")]
-    partial class BooksContainCategoriesTable
+    [Migration("20241114093846_FreshState")]
+    partial class FreshState
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,21 @@ namespace BookStore.Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("BookCategory", b =>
+                {
+                    b.Property<Guid>("BookId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("BookId", "CategoryId");
+
+                    b.HasIndex("CategoryId");
+
+                    b.ToTable("BookCategory");
+                });
 
             modelBuilder.Entity("BookStore.Domain.Entities.Book", b =>
                 {
@@ -39,10 +54,6 @@ namespace BookStore.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("BookImgUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CategoryIds")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -83,16 +94,11 @@ namespace BookStore.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("BookId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("BookId");
 
                     b.ToTable("BookCategories");
                 });
@@ -148,6 +154,21 @@ namespace BookStore.Infrastructure.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("BookCategory", b =>
+                {
+                    b.HasOne("BookStore.Domain.Entities.Book", null)
+                        .WithMany()
+                        .HasForeignKey("BookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BookStore.Domain.Entities.BookCategory", null)
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("BookStore.Domain.Entities.Book", b =>
                 {
                     b.HasOne("BookStore.Domain.Entities.User", "AddedBy")
@@ -159,13 +180,6 @@ namespace BookStore.Infrastructure.Migrations
                     b.Navigation("AddedBy");
                 });
 
-            modelBuilder.Entity("BookStore.Domain.Entities.BookCategory", b =>
-                {
-                    b.HasOne("BookStore.Domain.Entities.Book", null)
-                        .WithMany("Categories")
-                        .HasForeignKey("BookId");
-                });
-
             modelBuilder.Entity("BookStore.Domain.Entities.User", b =>
                 {
                     b.HasOne("BookStore.Domain.Entities.Role", "Role")
@@ -175,11 +189,6 @@ namespace BookStore.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Role");
-                });
-
-            modelBuilder.Entity("BookStore.Domain.Entities.Book", b =>
-                {
-                    b.Navigation("Categories");
                 });
 #pragma warning restore 612, 618
         }
