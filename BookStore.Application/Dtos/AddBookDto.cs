@@ -14,6 +14,6 @@
 
         public required List<string> Categories { get; set; }
 
-        public float Price { get; set; }
+        public required float Price { get; set; }
     }
 }

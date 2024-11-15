@@ -81,7 +81,7 @@ namespace BookStore.Infrastructure.Repositories
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving users.");
+                _logger.LogError(ex, "Error retrieving book categories.");
                 return RepositoryResponse<IPaginationMetaDto<string>>.FailureResult(ex.Message);
             }
         }

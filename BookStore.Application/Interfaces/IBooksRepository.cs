@@ -10,7 +10,10 @@ namespace BookStore.Application.Interfaces
         Task<RepositoryResponse<IPaginationMetaDto<IBookResponseDto>>> GetAllBooksAsync(int page, int pageSize, Expression<Func<Book, bool>>? filter = null);
         Task<RepositoryResponse<string>> SaveBookAsync(Book book);
         //Task<RepositoryResponse<IPaginationMetaDto<IBook>>> UpdateBookAsync(Guid bookId);
-        Task<RepositoryResponse<IBook>> GetBookByIdAsync(Guid bookId);
-        Task<RepositoryResponse<IBook>> GetBookByTitleAsync(string title);
+        Task<RepositoryResponse<IBookResponseDto>> GetBookByIdAsync(string bookId);
+
+        Task<RepositoryResponse<Book>> GetBookByIdRawAsync(Guid bookId);
+        Task<RepositoryResponse<IBookResponseDto>> GetBookByTitleAsync(string title);
+        Task<RepositoryResponse<IPaginationMetaDto<IBookResponseDto>>> GetBooksByCategoryAsync(int pageNumber, int pageSize, Expression<Func<Book, bool>> filter);
     }
 }

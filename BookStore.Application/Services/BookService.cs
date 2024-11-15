@@ -3,6 +3,7 @@ using BookStore.Application.Dtos;
 using BookStore.Application.Interfaces;
 using BookStore.Application.Interfaces.Services;
 using BookStore.Domain.Entities;
+using System.Linq.Expressions;
 
 namespace BookStore.Application.Services
 {
@@ -45,13 +46,28 @@ namespace BookStore.Application.Services
                 Categories = bookCategories
             };
 
-            // Save the book using the repository
             return await _bookRepository.SaveBookAsync(book);
         }
 
         public async Task<RepositoryResponse<IPaginationMetaDto<IBookResponseDto>>> GetAllBooksAsync(int pageNumber, int pageSize)
         {
             return await _bookRepository.GetAllBooksAsync(pageNumber, pageSize);
+        }
+
+        public async Task<RepositoryResponse<IBookResponseDto>> GetBookByIdAsync(string bookId)
+        {
+            return await _bookRepository.GetBookByIdAsync(bookId);
+        }
+
+        public async Task<RepositoryResponse<IBookResponseDto>> GetBookByTitleAsync(string title)
+        {
+            return await _bookRepository.GetBookByTitleAsync(title);
+        }
+
+        public async Task<RepositoryResponse<IPaginationMetaDto<IBookResponseDto>>> GetBooksByCategoryAsync(string category, int pageNumber, int pageSize)
+        {
+            Expression<Func<Book, bool>> filter = b => b.Categories!.Any(c => c.Name == category);
+            return await _bookRepository.GetBooksByCategoryAsync(pageNumber, pageSize, filter);
         }
     }
 }

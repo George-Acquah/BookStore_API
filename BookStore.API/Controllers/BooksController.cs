@@ -31,6 +31,64 @@ namespace BookStore.API.Controllers
                 result.Data));
         }
 
+        [HttpGet("{bookId}")]
+        public async Task<IActionResult> GetBookById(string bookId)
+        {
+            var result = await _bookService.GetBookByIdAsync(bookId);
+
+            if (!result.Success)
+            {
+                return BadRequest(new BaseAPIResponse<string>(
+                    StatusCodes.Status400BadRequest,
+                    result.ErrorMessage,
+                    null));
+            }
+
+            return Ok(new BaseAPIResponse<object>(
+                StatusCodes.Status200OK,
+                "Book retrieved successfully",
+                result.Data));
+        }
+
+        [HttpGet("get-title")]
+        public async Task<IActionResult> GetBookByTitle([FromQuery] string title)
+        {
+            var result = await _bookService.GetBookByTitleAsync(title.Trim('"'));
+
+            if (!result.Success)
+            {
+                return BadRequest(new BaseAPIResponse<string>(
+                    StatusCodes.Status400BadRequest,
+                    result.ErrorMessage,
+                    null));
+            }
+
+            return Ok(new BaseAPIResponse<object>(
+                StatusCodes.Status200OK,
+                "Book retrieved successfully",
+                result.Data));
+        }
+
+        [HttpGet("categories")]
+        public async Task<IActionResult> GetBooksByCategory([FromQuery] string category, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            var result = await _bookService.GetBooksByCategoryAsync(category.Trim('"').ToUpper(), pageNumber, pageSize);
+
+            if (!result.Success)
+            {
+                return BadRequest(new BaseAPIResponse<string>(
+                    StatusCodes.Status400BadRequest,
+                    result.ErrorMessage,
+                    null));
+            }
+
+            return Ok(new BaseAPIResponse<object>(
+                StatusCodes.Status200OK,
+                $"Successfully fetched books with category {category.Trim('"')}",
+                result.Data));
+        }
+
+
         [HttpPost("add-book")]
         [Authorize]
         public async Task<IActionResult> UploadABook(AddBookDto bookDto)
