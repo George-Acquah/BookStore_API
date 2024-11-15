@@ -39,7 +39,7 @@ namespace BookStore.Infrastructure.DB
 
         private void UpdateTimestamps()
         {
-            var entries = ChangeTracker.Entries<IBaseEntity>();
+            var entries = ChangeTracker.Entries<BaseEntity>();
 
             foreach (var entry in entries)
             {

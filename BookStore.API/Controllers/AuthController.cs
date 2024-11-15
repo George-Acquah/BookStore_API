@@ -66,7 +66,7 @@ namespace BookStore.API.Controllers
                 result.Data));
         }
 
-        [HttpGet]
+        [HttpGet("users")]
         [Authorize]
         public async Task<IActionResult> GetAllUsers( [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {

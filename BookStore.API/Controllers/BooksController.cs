@@ -1,6 +1,7 @@
 ﻿using BookStore.Application.Common;
 using BookStore.Application.Dtos;
 using BookStore.Application.Interfaces.Services;
+using BookStore.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -111,7 +112,27 @@ namespace BookStore.API.Controllers
 
             return Ok(new BaseAPIResponse<object>(
                 StatusCodes.Status200OK,
-                "Books retrieved successfully",
+                "Books added successfully",
+                result.Data));
+        }
+
+        [HttpPatch("update-book/{bookId}")]
+        [Authorize]
+        public async Task<IActionResult> UpdateBook(string bookId, UpdateBookDto updateBookDto)
+        {
+            var result = await _bookService.UpdateBookAsync(bookId, updateBookDto);
+
+            if (!result.Success)
+            {
+                return BadRequest(new BaseAPIResponse<string>(
+                    StatusCodes.Status400BadRequest,
+                    result.ErrorMessage,
+                    null));
+            }
+
+            return Ok(new BaseAPIResponse<object>(
+                StatusCodes.Status200OK,
+                "Book has been updated successfully",
                 result.Data));
         }
     }

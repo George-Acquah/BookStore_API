@@ -106,6 +106,21 @@ namespace BookStore.Infrastructure.Repositories
             }
         }
 
+        public async Task<RepositoryResponse<string>> UpdateBookAsync(Book book)
+        {
+            try
+            {
+                _dbContext.Books.Update(book);
+                await _dbContext.SaveChangesAsync();
+                return RepositoryResponse<string>.SuccessResult($"Book with title {book.Title} has been updated successfully");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error adding a new book.");
+                return RepositoryResponse<string>.FailureResult(ex.Message);
+            }
+        }
+
         public async Task<RepositoryResponse<IPaginationMetaDto<IBookResponseDto>>> GetAllBooksAsync(int pageNumber, int pageSize, Expression<Func<Book, bool>>? filter = null)
         {
             try
@@ -175,7 +190,9 @@ namespace BookStore.Infrastructure.Repositories
 
                 var paginatedBooks = await PaginationHelper.GetPaginatedResultAsync(projectedQuery, pageNumber, pageSize);
 
-                return RepositoryResponse<IPaginationMetaDto<IBookResponseDto>>.SuccessResult(paginatedBooks);
+                return paginatedBooks.TotalItems > 0
+                    ? RepositoryResponse<IPaginationMetaDto<IBookResponseDto>>.SuccessResult(paginatedBooks)
+                    : RepositoryResponse<IPaginationMetaDto<IBookResponseDto>>.FailureResult("No book with this category was found.");
             }
             catch (Exception ex)
             {

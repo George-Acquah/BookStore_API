@@ -69,5 +69,30 @@ namespace BookStore.Application.Services
             Expression<Func<Book, bool>> filter = b => b.Categories!.Any(c => c.Name == category);
             return await _bookRepository.GetBooksByCategoryAsync(pageNumber, pageSize, filter);
         }
+
+        public async Task<RepositoryResponse<string>> UpdateBookAsync(string bookId, UpdateBookDto updateBookDto)
+        {
+            if (updateBookDto.Categories != null)
+            {
+                return RepositoryResponse<string>.FailureResult("You cannot update a book's category for now");
+            }
+
+            var bookGuid = Guid.Parse(bookId);
+
+            var existingBook = await _bookRepository.GetBookByIdRawAsync(bookGuid);
+            if (existingBook == null)
+            {
+                return RepositoryResponse<string>.FailureResult("Book not found.");
+            }
+
+            existingBook.Data!.Author = updateBookDto.Author;
+            existingBook.Data!.Title = updateBookDto.Title;
+            existingBook.Data!.Description = updateBookDto.Description;
+            existingBook.Data!.BookImgUrl = updateBookDto.BookImgUrl;
+            existingBook.Data!.FilePath = updateBookDto.FilePath;
+            existingBook.Data!.Price = updateBookDto.Price;
+
+            return await _bookRepository.UpdateBookAsync(existingBook.Data);
+        }
     }
 }
