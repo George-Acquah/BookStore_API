@@ -65,6 +65,21 @@ namespace BookStore.Infrastructure.Repositories
             }
         }
 
+        public async Task<RepositoryResponse<string>> AddRoleAsync(Role role)
+        {
+            try
+            {
+                await _dbContext.AddAsync(role);
+                await _dbContext.SaveChangesAsync();
+                return RepositoryResponse<string>.SuccessResult("Added role successfully.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return RepositoryResponse<string>.FailureResult(ex.Message);
+            }
+        }
+
         public async Task<RepositoryResponse<string>> DeleteAllRolesAsync()
         {
             try

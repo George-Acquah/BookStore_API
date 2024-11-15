@@ -8,7 +8,7 @@ namespace BookStore.Application.Interfaces.Services
     {
         Task<RepositoryResponse<IPaginationMetaDto<IBookResponseDto>>> GetAllBooksAsync(int pageNumber, int pageSize);
         Task<RepositoryResponse<string>> UploadBookAsync(AddBookDto bookDto, Guid addedById);
-        Task<RepositoryResponse<string>> UpdateBookAsync(string bookId, UpdateBookDto updateBookDto);
+        Task<RepositoryResponse<string>> UpdateBookAsync(string bookId, Guid userId, UpdateBookDto updateBookDto);
         Task<RepositoryResponse<IBookResponseDto>> GetBookByIdAsync(string bookId);
         Task<RepositoryResponse<IBookResponseDto>> GetBookByTitleAsync(string title);
         Task<RepositoryResponse<IPaginationMetaDto<IBookResponseDto>>> GetBooksByCategoryAsync(string category, int pageNumber, int pageSize);

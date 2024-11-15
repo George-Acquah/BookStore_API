@@ -70,7 +70,7 @@ namespace BookStore.Application.Services
             return await _bookRepository.GetBooksByCategoryAsync(pageNumber, pageSize, filter);
         }
 
-        public async Task<RepositoryResponse<string>> UpdateBookAsync(string bookId, UpdateBookDto updateBookDto)
+        public async Task<RepositoryResponse<string>> UpdateBookAsync(string bookId, Guid userId,  UpdateBookDto updateBookDto)
         {
             if (updateBookDto.Categories != null)
             {
@@ -80,9 +80,20 @@ namespace BookStore.Application.Services
             var bookGuid = Guid.Parse(bookId);
 
             var existingBook = await _bookRepository.GetBookByIdRawAsync(bookGuid);
+
+            if(!existingBook.Success && existingBook.ErrorMessage != null)
+            {
+                return RepositoryResponse<string>.FailureResult(existingBook.ErrorMessage);
+            }
+
             if (existingBook == null)
             {
                 return RepositoryResponse<string>.FailureResult("Book not found.");
+            }
+
+            if(existingBook.Data!.AddedById != userId)
+            {
+                return RepositoryResponse<string>.FailureResult("You do not own this book.");
             }
 
             existingBook.Data!.Author = updateBookDto.Author;

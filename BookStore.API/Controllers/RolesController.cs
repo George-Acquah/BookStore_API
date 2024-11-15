@@ -1,5 +1,7 @@
-﻿using BookStore.Application.Common;
+﻿using BookStore.API.Helpers;
+using BookStore.Application.Common;
 using BookStore.Application.Interfaces;
+using BookStore.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,14 +17,14 @@ namespace BookStore.API.Controllers
         [Authorize]
         public async Task<IActionResult> GetAllRoles()
         {
-            var useridClaim = User.FindFirst("UserId")?.Value;
-
-            if (useridClaim == null || !Guid.TryParse(useridClaim, out Guid userId))
+            var userRole = ClaimsHelper.GetUserRoleFromClaims(User);
+            if (userRole == ERolesEnum.USER.ToString())
             {
-                return Unauthorized(new BaseAPIResponse<string>(StatusCodes.Status401Unauthorized, "User ID claim is missing or invalid", null));
+                return BadRequest(new BaseAPIResponse<string>(
+                    StatusCodes.Status401Unauthorized,
+                    "Users cannot view roles",
+                    null));
             }
-
-            Console.WriteLine(userId);
             var result = await _rolesRepository.GetAllRolesAsync();
             if (!result.Success)
             {
@@ -39,8 +41,17 @@ namespace BookStore.API.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> AddRoles()
         {
+            var userRole = ClaimsHelper.GetUserRoleFromClaims(User);
+            if (userRole != ERolesEnum.SUPER_ADMIN.ToString())
+            {
+                return BadRequest(new BaseAPIResponse<string>(
+                    StatusCodes.Status401Unauthorized,
+                    "Contact you super admin to add this role",
+                    null));
+            }
             var result = await _rolesRepository.AddRolesAsync();
             if (!result.Success)
             {
@@ -57,9 +68,17 @@ namespace BookStore.API.Controllers
         }
 
         [HttpDelete]
-
+        [Authorize]
         public async Task<IActionResult> DeleteRoles()
         {
+            var userRole = ClaimsHelper.GetUserRoleFromClaims(User);
+            if (userRole != ERolesEnum.SUPER_ADMIN.ToString())
+            {
+                return BadRequest(new BaseAPIResponse<string>(
+                    StatusCodes.Status401Unauthorized,
+                    "Contact you super admin to delete this role",
+                    null));
+            }
             var result = await _rolesRepository.DeleteAllRolesAsync();
             if (!result.Success)
             {

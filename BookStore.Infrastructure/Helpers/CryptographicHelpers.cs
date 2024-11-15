@@ -18,6 +18,7 @@ namespace BookStore.Infrastructure.Helpers
                 new Claim(JwtRegisteredClaimNames.Sub, user.Email),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim("UserId", user.Id.ToString()),
+                new Claim(ClaimTypes.Role, user.Role != null ? user.Role!.Name.ToString() : "USER")
 
             };
 

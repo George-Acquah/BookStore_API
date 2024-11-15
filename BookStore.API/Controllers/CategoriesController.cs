@@ -1,6 +1,9 @@
-﻿using BookStore.Application.Common;
+﻿using BookStore.API.Helpers;
+using BookStore.Application.Common;
 using BookStore.Application.Dtos;
 using BookStore.Application.Interfaces.Services;
+using BookStore.Domain;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,8 +16,18 @@ namespace BookStore.API.Controllers
         private readonly IBookCategoryService _bookCategoryService = bookCategoryService;
 
         [HttpPost("add-category")]
+        [Authorize]
         public async Task<IActionResult> AddCategory(AddCategoryDto categoryDto)
         {
+            var userRole = ClaimsHelper.GetUserRoleFromClaims(User);
+            if (userRole == ERolesEnum.USER.ToString())
+            {
+                return BadRequest(new BaseAPIResponse<string>(
+                    StatusCodes.Status401Unauthorized,
+                    "Users cannot add categories",
+                    null));
+            }
+
             var result = await _bookCategoryService.AddBookCategoryAsync(categoryDto.CategoryName.ToUpper());
 
             if (!result.Success)

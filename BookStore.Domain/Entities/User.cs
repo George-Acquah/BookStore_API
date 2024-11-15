@@ -8,6 +8,7 @@ namespace BookStore.Domain.Entities
         Guid Id { get; set; }
         string Password { get; set; }
         string UserName { get; set; }
+        public Role? Role { get; set; }
     }
 
     public class User : BaseEntity, IUserEntity

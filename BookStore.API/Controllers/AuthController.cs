@@ -1,4 +1,5 @@
-﻿using BookStore.Application.Common;
+﻿using BookStore.API.Helpers;
+using BookStore.Application.Common;
 using BookStore.Application.Dtos;
 using BookStore.Application.Interfaces;
 using BookStore.Domain;
@@ -70,6 +71,14 @@ namespace BookStore.API.Controllers
         [Authorize]
         public async Task<IActionResult> GetAllUsers( [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
+            var userRole = ClaimsHelper.GetUserRoleFromClaims(User);
+            if (userRole == ERolesEnum.USER.ToString())
+            {
+                return BadRequest(new BaseAPIResponse<string>(
+                    StatusCodes.Status401Unauthorized,
+                    "Users cannot view users",
+                    null));
+            }
             var result = await _userRepository.GetAllUsersAsync(pageNumber, pageSize);
 
             if (!result.Success)
@@ -88,10 +97,19 @@ namespace BookStore.API.Controllers
 
         }
 
-        [HttpGet("{userId}")]
+        [HttpGet("users/{userId}")]
         [Authorize]
         public async Task<IActionResult> GetSingleUser(string userId)
         {
+            var userRole = ClaimsHelper.GetUserRoleFromClaims(User);
+            if (userRole == ERolesEnum.USER.ToString())
+            {
+                return BadRequest(new BaseAPIResponse<string>(
+                    StatusCodes.Status401Unauthorized,
+                    "Users cannot view a user",
+                    null));
+            }
+
             var userGuid = Guid.Parse(userId);
 
             var result = await _userRepository.GetSingleUserAsync(userGuid);

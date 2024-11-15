@@ -1,9 +1,9 @@
-﻿using BookStore.Application.Common;
+﻿using BookStore.API.Helpers;
+using BookStore.Application.Common;
 using BookStore.Application.Dtos;
 using BookStore.Application.Interfaces.Services;
-using BookStore.Domain.Entities;
+using BookStore.Domain;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookStore.API.Controllers
@@ -94,13 +94,21 @@ namespace BookStore.API.Controllers
         [Authorize]
         public async Task<IActionResult> UploadABook(AddBookDto bookDto)
         {
-            var useridClaim = User.FindFirst("UserId")?.Value;
+            var userRole = ClaimsHelper.GetUserRoleFromClaims(User);
+            if (userRole == ERolesEnum.USER.ToString())
+            {
+                return BadRequest(new BaseAPIResponse<string>(
+                    StatusCodes.Status401Unauthorized,
+                    "Users cannot update a book",
+                    null));
+            }
+            var userId = ClaimsHelper.GetUserIdFromClaims(User);
 
-            if (useridClaim == null || !Guid.TryParse(useridClaim, out Guid userId))
+            if (userId == null)
             {
                 return Unauthorized(new BaseAPIResponse<string>(StatusCodes.Status401Unauthorized, "User ID claim is missing or invalid", null));
             }
-            var result = await _bookService.UploadBookAsync(bookDto, userId);
+            var result = await _bookService.UploadBookAsync(bookDto, (Guid)userId);
 
             if (!result.Success)
             {
@@ -120,7 +128,21 @@ namespace BookStore.API.Controllers
         [Authorize]
         public async Task<IActionResult> UpdateBook(string bookId, UpdateBookDto updateBookDto)
         {
-            var result = await _bookService.UpdateBookAsync(bookId, updateBookDto);
+            var userRole = ClaimsHelper.GetUserRoleFromClaims(User);
+            if(userRole == ERolesEnum.USER.ToString())
+            {
+                return BadRequest(new BaseAPIResponse<string>(
+                    StatusCodes.Status401Unauthorized,
+                    "Users cannot update a book",
+                    null));
+            }
+            var userId = ClaimsHelper.GetUserIdFromClaims(User);
+
+            if (userId == null)
+            {
+                return Unauthorized(new BaseAPIResponse<string>(StatusCodes.Status401Unauthorized, "User ID claim is missing or invalid", null));
+            }
+            var result = await _bookService.UpdateBookAsync(bookId, (Guid)userId!, updateBookDto);
 
             if (!result.Success)
             {
